@@ -1,28 +1,25 @@
-# Copyright (c) Microsoft. All rights reserved.
+# This is an example of creating a basic Azure AI Agent Framework agent with a simple weather tool.
 
+# Use the venv Python virtual environment
+
+# Import necessary libraries
+import argparse
 import asyncio
+from json import tool
+import os
 from random import randint
 from typing import Annotated
+from pydantic import Field
 
 from dotenv import load_dotenv
 
+from agent_framework import ChatAgent, AgentThread
 from agent_framework.azure import AzureAIProjectAgentProvider
 from azure.identity.aio import AzureCliCredential
-from pydantic import Field
-from agent_framework import tool
 
 # Load environment variables from .env file
 load_dotenv()
 
-"""
-Azure AI Agent Basic Example
-
-This sample demonstrates basic usage of AzureAIProjectAgentProvider.
-Shows both streaming and non-streaming responses with function tools.
-"""
-
-# NOTE: approval_mode="never_require" is for sample brevity. Use "always_require" in production; see samples/getting_started/tools/function_tool_with_approval.py and samples/getting_started/tools/function_tool_with_approval_and_threads.py.
-@tool(approval_mode="never_require")
 def get_weather(
     location: Annotated[str, Field(description="The location to get the weather for.")],
 ) -> str:
@@ -30,8 +27,8 @@ def get_weather(
     conditions = ["sunny", "cloudy", "rainy", "stormy"]
     return f"The weather in {location} is {conditions[randint(0, 3)]} with a high of {randint(10, 30)}°C."
 
-
-async def non_streaming_example() -> None:
+# Example of non-streaming response
+async def non_streaming_agent() -> None:
     """Example of non-streaming response (get the complete result at once)."""
     print("=== Non-streaming Response Example ===")
 
@@ -52,8 +49,8 @@ async def non_streaming_example() -> None:
         result = await agent.run(query)
         print(f"Agent: {result}\n")
 
-
-async def streaming_example() -> None:
+# Example of streaming response
+async def streaming_agent() -> None:
     """Example of streaming response (get results as they are generated)."""
     print("=== Streaming Response Example ===")
 
@@ -77,12 +74,21 @@ async def streaming_example() -> None:
                 print(chunk.text, end="", flush=True)
         print("\n")
 
-
+# Main entry point
 async def main() -> None:
-    print("=== Basic Azure AI Chat Client Agent Example ===")
+    parser = argparse.ArgumentParser(description="Azure AI Agent Framework Examples")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    subparsers.add_parser("non_streaming", help="Run non-streaming agent example")
+    subparsers.add_parser("streaming", help="Run streaming agent example")
 
-    await non_streaming_example()
-    await streaming_example()
+    args = parser.parse_args()
+
+    if args.command == "non_streaming":
+        await non_streaming_agent()
+    elif args.command == "streaming":
+        await streaming_agent()
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":

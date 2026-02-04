@@ -1,3 +1,6 @@
+# This module demonstrates how to manage and interact with AI agents using Azure AI Projects in Foundry SDK.
+
+# Import necessary modules
 import os
 import time
 import asyncio
@@ -8,8 +11,7 @@ from dotenv import load_dotenv
 
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
-from azure.ai.agents.models import CodeInterpreterTool
-from azure.ai.agents.models import ListSortOrder
+from azure.ai.agents.models import CodeInterpreterTool, ListSortOrder
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,7 +40,7 @@ def delete_agent(agent_id):
 
 # List all agents
 def list_agents():
-    agents = project_client.agents.list_agents()
+    agents = project_client.agents.list()
     for agent in agents:
         print(f"Agent ID: {agent.id}")
         print(f"Agent Name: {agent.name}")
